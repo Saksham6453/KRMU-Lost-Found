@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from datetime import datetime
@@ -9,28 +9,25 @@ app = Flask(__name__)
 CORS(app)
 
 # --- App Configuration ---
-# This section securely gets the secret key and database URL from the environment variables you set on Render.
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-for-local-dev')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Get the database URL from the environment variable
+# --- Database Configuration ---
 database_url = os.environ.get('DATABASE_URL')
-
-# This block checks if the database URL exists and fixes the 'postgres://' prefix for SQLAlchemy
 if database_url:
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
-    # This is a fallback for local development if DATABASE_URL is not set
+    if not os.path.exists('instance'):
+        os.makedirs('instance')
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/lost_found.db'
 
+db = SQLAlchemy(app)
 
 # --- Hardcoded Admin Credentials ---
 ADMIN_USERNAME = 'admin'
 ADMIN_PASSWORD = 'password123'
-
-db = SQLAlchemy(app)
 
 # --- Database Models ---
 class Item(db.Model):
@@ -62,11 +59,8 @@ class Item(db.Model):
             'is_resolved': self.is_resolved
         }
 
-# --- Create database tables ---
-# This ensures that the tables are created when the app starts.
 with app.app_context():
     db.create_all()
-
 
 # --- Login Required Decorator ---
 def login_required(f):
@@ -85,6 +79,9 @@ def index():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'No input provided'}), 400
+
     username = data.get('username')
     password = data.get('password')
 
@@ -109,9 +106,9 @@ def get_items():
     status_filter = request.args.get('status', 'all')
     category_filter = request.args.get('category', 'all')
     resolved_filter = request.args.get('resolved', 'active')
-    
+
     query = Item.query
-    
+
     if status_filter != 'all':
         query = query.filter(Item.status == status_filter)
     
@@ -126,11 +123,13 @@ def get_items():
     items = query.order_by(Item.date_created.desc()).all()
     return jsonify([item.to_dict() for item in items])
 
-
 @app.route('/api/items', methods=['POST'])
 def create_item():
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'No input provided'}), 400
+
     try:
-        data = request.get_json()
         new_item = Item(
             title=data.get('title'),
             description=data.get('description'),
@@ -149,12 +148,11 @@ def create_item():
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 400
 
-
 @app.route('/api/stats')
 def get_stats():
     total_items = Item.query.count()
-    lost_items = Item.query.filter(Item.status == 'lost', Item.is_resolved == False).count()
-    found_items = Item.query.filter(Item.status == 'found', Item.is_resolved == False).count()
+    lost_items = Item.query.filter((Item.status == 'lost') & (Item.is_resolved == False)).count()
+    found_items = Item.query.filter((Item.status == 'found') & (Item.is_resolved == False)).count()
     resolved_items = Item.query.filter(Item.is_resolved == True).count()
     
     return jsonify({
@@ -164,14 +162,16 @@ def get_stats():
         'resolved_items': resolved_items
     })
 
-
 # --- Protected Admin API Routes ---
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
 @login_required
 def update_item(item_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({'success': False, 'message': 'No input provided'}), 400
+
     try:
         item = Item.query.get_or_404(item_id)
-        data = request.get_json()
         
         item.title = data.get('title', item.title)
         item.description = data.get('description', item.description)
@@ -181,22 +181,16 @@ def update_item(item_id):
         item.contact_name = data.get('contact_name', item.contact_name)
         item.contact_email = data.get('contact_email', item.contact_email)
         item.contact_phone = data.get('contact_phone', item.contact_phone)
-        
+
         if 'is_resolved' in data:
             item.is_resolved = data['is_resolved']
-            if item.is_resolved:
-                item.date_resolved = datetime.utcnow()
-            else:
-                item.date_resolved = None
-        
+            item.date_resolved = datetime.utcnow() if item.is_resolved else None
+
         db.session.commit()
-        
         return jsonify({'success': True, 'message': 'Item updated successfully', 'item': item.to_dict()})
-    
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
-
 
 @app.route('/api/items/<int:item_id>', methods=['DELETE'])
 @login_required
@@ -205,13 +199,10 @@ def delete_item(item_id):
         item = Item.query.get_or_404(item_id)
         db.session.delete(item)
         db.session.commit()
-        
         return jsonify({'success': True, 'message': 'Item deleted successfully'})
-    
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
-
 
 if __name__ == '__main__':
     app.run(debug=True)
