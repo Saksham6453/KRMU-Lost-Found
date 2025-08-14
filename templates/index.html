@@ -1,0 +1,1024 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Lost & Found System</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Your existing CSS remains the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .filters {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        select {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .item-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .status-lost {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .status-found {
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            color: white;
+        }
+
+        .item-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .item-description {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .item-detail {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .close {
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .btn-cancel {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">
+                <i class="fas fa-search"></i>
+                College Lost & Found
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" onclick="showPublicView()">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <a href="#" class="nav-link" onclick="handleAdminClick()">
+                    <i class="fas fa-cog"></i> Admin
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Public View -->
+        <div id="publicView">
+            <!-- Hero Section -->
+            <div class="hero">
+                <h2>K.R. MANGLAM UNIVERSITY</h2>
+                <h1>Lost Something? Found Something?</h1>
+                <p>Helping the fellow students reunite with their belongings</p>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="openModal('report-lost')">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Report Lost Item
+                    </button>
+                    <button class="btn btn-secondary" onclick="openModal('report-found')">
+                        <i class="fas fa-plus-circle"></i>
+                        Report Found Item
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalItems">0</div>
+                    <div class="stat-label">Total Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lostItems">0</div>
+                    <div class="stat-label">Lost Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="foundItems">0</div>
+                    <div class="stat-label">Found Items</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="resolvedItems">0</div>
+                    <div class="stat-label">Resolved</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="statusFilter">Status:</label>
+                    <select id="statusFilter" onchange="loadItems()">
+                        <option value="all">All</option>
+                        <option value="lost">Lost</option>
+                        <option value="found">Found</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="categoryFilter">Category:</label>
+                    <select id="categoryFilter" onchange="loadItems()">
+                        <option value="all">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="books">Books</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="documents">Documents</option>
+                        <option value="keys">Keys</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="resolvedFilter">Show:</label>
+                    <select id="resolvedFilter" onchange="loadItems()">
+                        <option value="active">Active Items</option>
+                        <option value="resolved">Resolved Items</option>
+                        <option value="all">All Items</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Items Grid -->
+            <div id="itemsGrid" class="items-grid"></div>
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Loading...
+            </div>
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h2>No items found</h2>
+                <p>Try adjusting your filters or be the first to report an item!</p>
+            </div>
+        </div>
+
+        <!-- Admin View -->
+        <div id="adminView" style="display: none;">
+            <!-- Admin content will be populated by JS after login -->
+        </div>
+
+        <!-- Login View -->
+        <div id="loginView" style="display: none; color: white; text-align: center;">
+            <h2>Admin Login</h2>
+            <form id="loginForm" style="max-width: 400px; margin: 2rem auto; background: rgba(255,255,255,0.1); padding: 2rem; border-radius: 16px;">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p id="loginError" style="color: #ff6b6b; margin-top: 1rem;"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing items -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Report Item</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <form id="itemForm">
+                <div class="form-group">
+                    <label for="itemTitle">Item Title *</label>
+                    <input type="text" id="itemTitle" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemDescription">Description *</label>
+                    <textarea id="itemDescription" required placeholder="Please provide detailed description..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemCategory">Category *</label>
+                    <select id="itemCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="books">Books</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="documents">Documents</option>
+                        <option value="keys">Keys</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="itemLocation">Location *</label>
+                    <input type="text" id="itemLocation" required placeholder="Where was it lost/found?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactName">Your Name *</label>
+                    <input type="text" id="contactName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactEmail">Your Email *</label>
+                    <input type="email" id="contactEmail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contactPhone">Phone Number</label>
+                    <input type="tel" id="contactPhone" placeholder="Optional">
+                </div>
+                
+                <input type="hidden" id="itemStatus">
+                <input type="hidden" id="itemId">
+                
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentView = 'public';
+        let isLoggedIn = false;
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkLoginStatus();
+            loadStats();
+            loadItems();
+        });
+        
+        document.getElementById('loginForm').addEventListener('submit', handleLogin);
+        document.getElementById('itemForm').addEventListener('submit', handleItemSubmit);
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('itemModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // --- AUTHENTICATION & VIEW MANAGEMENT ---
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/auth_status');
+                const data = await response.json();
+                isLoggedIn = data.logged_in;
+            } catch (error) {
+                console.error('Error checking login status:', error);
+                isLoggedIn = false;
+            }
+        }
+
+        function showPublicView() {
+            document.getElementById('publicView').style.display = 'block';
+            document.getElementById('adminView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'none';
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link[onclick="showPublicView()"]').classList.add('active');
+            currentView = 'public';
+        }
+
+        async function handleAdminClick() {
+            await checkLoginStatus();
+            if (isLoggedIn) {
+                showAdminView();
+            } else {
+                showLoginView();
+            }
+        }
+
+        function showAdminView() {
+            document.getElementById('publicView').style.display = 'none';
+            document.getElementById('adminView').style.display = 'block';
+            document.getElementById('loginView').style.display = 'none';
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link[onclick="handleAdminClick()"]').classList.add('active');
+            currentView = 'admin';
+            
+            document.getElementById('adminView').innerHTML = `
+                <div class="hero">
+                    <h1>Admin Panel</h1>
+                    <p>Manage lost and found items. <a href="/logout" style="color: white; text-decoration: underline;">Logout</a></p>
+                </div>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="adminStatusFilter">Status:</label>
+                        <select id="adminStatusFilter" onchange="loadAdminItems()">
+                            <option value="all">All</option>
+                            <option value="lost">Lost</option>
+                            <option value="found">Found</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="adminCategoryFilter">Category:</label>
+                        <select id="adminCategoryFilter" onchange="loadAdminItems()">
+                            <option value="all">All Categories</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="books">Books</option>
+                            <option value="clothing">Clothing</option>
+                            <option value="accessories">Accessories</option>
+                            <option value="documents">Documents</option>
+                            <option value="keys">Keys</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="adminResolvedFilter">Show:</label>
+                        <select id="adminResolvedFilter" onchange="loadAdminItems()">
+                            <option value="active">Active Items</option>
+                            <option value="resolved">Resolved Items</option>
+                            <option value="all">All Items</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="adminItemsGrid" class="items-grid"></div>`;
+            loadAdminItems();
+        }
+
+        function showLoginView() {
+            document.getElementById('publicView').style.display = 'none';
+            document.getElementById('adminView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'block';
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link[onclick="handleAdminClick()"]').classList.add('active');
+        }
+        
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorP = document.getElementById('loginError');
+            errorP.textContent = '';
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    isLoggedIn = true;
+                    showAdminView();
+                } else {
+                    errorP.textContent = result.message || 'Login failed.';
+                }
+            } catch (error) {
+                errorP.textContent = 'An error occurred. Please try again.';
+            }
+        }
+
+        // --- DATA LOADING & DISPLAY ---
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                document.getElementById('totalItems').textContent = stats.total_items;
+                document.getElementById('lostItems').textContent = stats.lost_items;
+                document.getElementById('foundItems').textContent = stats.found_items;
+                document.getElementById('resolvedItems').textContent = stats.resolved_items;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadItems() {
+            showLoading();
+            const status = document.getElementById('statusFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const resolved = document.getElementById('resolvedFilter').value;
+            const params = new URLSearchParams({ status, category, resolved });
+            
+            try {
+                const response = await fetch(`/api/items?${params}`);
+                const items = await response.json();
+                displayItems(items, 'itemsGrid');
+            } catch (error) {
+                console.error('Error loading items:', error);
+                showEmptyState();
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadAdminItems() {
+            const status = document.getElementById('adminStatusFilter').value;
+            const category = document.getElementById('adminCategoryFilter').value;
+            const resolved = document.getElementById('adminResolvedFilter').value;
+            const params = new URLSearchParams({ status, category, resolved });
+
+            try {
+                const response = await fetch(`/api/items?${params}`);
+                const items = await response.json();
+                displayAdminItems(items, 'adminItemsGrid');
+            } catch (error) {
+                console.error('Error loading admin items:', error);
+            }
+        }
+
+        function displayItems(items, gridId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            if (items.length === 0) {
+                showEmptyState();
+                return;
+            }
+            hideEmptyState();
+            grid.innerHTML = items.map(item => `
+                <div class="item-card">
+                    <span class="item-status status-${item.status}">${item.status}</span>
+                    <h3 class="item-title">${item.title}</h3>
+                    <p class="item-description">${item.description}</p>
+                    <div class="item-details">
+                        <div class="item-detail"><i class="fas fa-tag"></i><span>${item.category}</span></div>
+                        <div class="item-detail"><i class="fas fa-map-marker-alt"></i><span>${item.location}</span></div>
+                        <div class="item-detail"><i class="fas fa-user"></i><span>${item.contact_name}</span></div>
+                        <div class="item-detail"><i class="fas fa-calendar"></i><span>${new Date(item.date_created).toLocaleDateString()}</span></div>
+                        ${item.is_resolved ? '<div class="item-detail" style="color: #27ae60; font-weight: bold;"><i class="fas fa-check-circle"></i><span>Resolved</span></div>' : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayAdminItems(items, gridId) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            if (items.length === 0) {
+                grid.innerHTML = '<div class="empty-state" style="color: #333;"><i class="fas fa-search"></i><h2>No items found</h2></div>';
+                return;
+            }
+            grid.innerHTML = items.map(item => `
+                <div class="item-card">
+                    <span class="item-status status-${item.status}">${item.status}</span>
+                    <h3 class="item-title">${item.title}</h3>
+                    <p class="item-description">${item.description}</p>
+                    <div class="item-details">
+                        <div class="item-detail"><i class="fas fa-tag"></i><span>${item.category}</span></div>
+                        <div class="item-detail"><i class="fas fa-map-marker-alt"></i><span>${item.location}</span></div>
+                        <div class="item-detail"><i class="fas fa-user"></i><span>${item.contact_name}</span></div>
+                        <div class="item-detail"><i class="fas fa-envelope"></i><span>${item.contact_email}</span></div>
+                        <div class="item-detail"><i class="fas fa-calendar"></i><span>${new Date(item.date_created).toLocaleDateString()}</span></div>
+                        ${item.is_resolved ? '<div class="item-detail" style="color: #27ae60; font-weight: bold;"><i class="fas fa-check-circle"></i><span>Resolved</span></div>' : ''}
+                    </div>
+                    <div class="item-actions" style="margin-top: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="editItem(${item.id})"><i class="fas fa-edit"></i> Edit</button>
+                        <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: ${item.is_resolved ? '#95a5a6' : '#27ae60'};" onclick="toggleResolveItem(${item.id}, ${!item.is_resolved})"><i class="fas fa-${item.is_resolved ? 'undo' : 'check'}"></i> ${item.is_resolved ? 'Unresolve' : 'Resolve'}</button>
+                        <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: #e74c3c;" onclick="deleteItem(${item.id})"><i class="fas fa-trash"></i> Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- MODAL & FORM HANDLING ---
+        function openModal(type) {
+            const modal = document.getElementById('itemModal');
+            const title = document.getElementById('modalTitle');
+            const statusField = document.getElementById('itemStatus');
+            const form = document.getElementById('itemForm');
+            form.reset();
+            document.getElementById('itemId').value = '';
+            
+            if (type === 'report-lost') {
+                title.textContent = 'Report Lost Item';
+                statusField.value = 'lost';
+            } else if (type === 'report-found') {
+                title.textContent = 'Report Found Item';
+                statusField.value = 'found';
+            }
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('itemModal').style.display = 'none';
+        }
+
+        async function handleItemSubmit(e) {
+            e.preventDefault();
+            
+            const formData = {
+                title: document.getElementById('itemTitle').value,
+                description: document.getElementById('itemDescription').value,
+                category: document.getElementById('itemCategory').value,
+                location: document.getElementById('itemLocation').value,
+                contact_name: document.getElementById('contactName').value,
+                contact_email: document.getElementById('contactEmail').value,
+                contact_phone: document.getElementById('contactPhone').value,
+                status: document.getElementById('itemStatus').value
+            };
+            
+            const itemId = document.getElementById('itemId').value;
+            const isEdit = itemId !== '';
+            
+            const url = isEdit ? `/api/items/${itemId}` : '/api/items';
+            const method = isEdit ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.status === 401) {
+                    alert('Authentication required. Please log in.');
+                    isLoggedIn = false;
+                    showLoginView();
+                    return;
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    closeModal();
+                    loadStats();
+                    if (currentView === 'public') {
+                        loadItems();
+                    } else {
+                        loadAdminItems();
+                    }
+                    alert(isEdit ? 'Item updated successfully!' : 'Item submitted successfully!');
+                } else {
+                    alert('Error: ' + (result.message || 'Could not submit item.'));
+                }
+            } catch (error) {
+                console.error('Error submitting item:', error);
+                alert('A network error occurred.');
+            }
+        }
+
+        // --- ADMIN ACTIONS ---
+        async function editItem(itemId) {
+            try {
+                // Fetching a single item isn't implemented, so we filter from the main list.
+                // This is inefficient but works with the current API.
+                const response = await fetch('/api/items?resolved=all');
+                const items = await response.json();
+                const item = items.find(i => i.id === itemId);
+                
+                if (item) {
+                    document.getElementById('modalTitle').textContent = 'Edit Item';
+                    document.getElementById('itemId').value = item.id;
+                    document.getElementById('itemTitle').value = item.title;
+                    document.getElementById('itemDescription').value = item.description;
+                    document.getElementById('itemCategory').value = item.category;
+                    document.getElementById('itemLocation').value = item.location;
+                    document.getElementById('contactName').value = item.contact_name;
+                    document.getElementById('contactEmail').value = item.contact_email;
+                    document.getElementById('contactPhone').value = item.contact_phone || '';
+                    document.getElementById('itemStatus').value = item.status;
+                    
+                    document.getElementById('itemModal').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading item for edit:', error);
+                alert('Error loading item details');
+            }
+        }
+
+        async function toggleResolveItem(itemId, resolve) {
+            try {
+                const response = await fetch(`/api/items/${itemId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_resolved: resolve })
+                });
+
+                if (response.status === 401) {
+                    alert('Your session has expired. Please log in again.');
+                    isLoggedIn = false;
+                    showLoginView();
+                    return;
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    loadAdminItems();
+                    loadStats();
+                } else {
+                    alert('Error updating item status');
+                }
+            } catch (error) {
+                console.error('Error updating item:', error);
+                alert('Error updating item status');
+            }
+        }
+
+        async function deleteItem(itemId) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                try {
+                    const response = await fetch(`/api/items/${itemId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.status === 401) {
+                        alert('Your session has expired. Please log in again.');
+                        isLoggedIn = false;
+                        showLoginView();
+                        return;
+                    }
+
+                    const result = await response.json();
+                    if (result.success) {
+                        loadAdminItems();
+                        loadStats();
+                    } else {
+                        alert('Error deleting item: ' + result.message);
+                    }
+                } catch (error) {
+                    console.error('Error deleting item:', error);
+                    alert('An error occurred while deleting the item.');
+                }
+            }
+        }
+
+        // --- UTILITY FUNCTIONS ---
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('itemsGrid').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('itemsGrid').style.display = 'grid';
+        }
+
+        function showEmptyState() {
+            document.getElementById('itemsGrid').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+        }
+        
+        function hideEmptyState() {
+            document.getElementById('itemsGrid').style.display = 'grid';
+            document.getElementById('emptyState').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
+
