@@ -1,31 +1,44 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS # Import CORS
+from flask_cors import CORS
 from datetime import datetime
 import os
 from functools import wraps
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for the entire app
+CORS(app)
 
-# IMPORTANT: Change this to a long, random string!
-app.config['SECRET_KEY'] = 'a-very-secret-and-random-key-for-sessions'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lost_found.db'
+# --- App Configuration ---
+# This section securely gets the secret key and database URL from the environment variables you set on Render.
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a-default-secret-key-for-local-dev')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# --- Hardcoded Admin Credentials (for simplicity) ---
+# Get the database URL from the environment variable
+database_url = os.environ.get('DATABASE_URL')
+
+# This block checks if the database URL exists and fixes the 'postgres://' prefix for SQLAlchemy
+if database_url:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # This is a fallback for local development if DATABASE_URL is not set
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/lost_found.db'
+
+
+# --- Hardcoded Admin Credentials ---
 ADMIN_USERNAME = 'admin'
-ADMIN_PASSWORD = 'password123' # Change this in your real project!
+ADMIN_PASSWORD = 'password123'
 
 db = SQLAlchemy(app)
 
-# Database Models (Your Item class remains the same)
+# --- Database Models ---
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     category = db.Column(db.String(50), nullable=False)
-    status = db.Column(db.String(20), nullable=False)  # 'lost' or 'found'
+    status = db.Column(db.String(20), nullable=False)
     location = db.Column(db.String(100), nullable=False)
     contact_name = db.Column(db.String(100), nullable=False)
     contact_email = db.Column(db.String(100), nullable=False)
@@ -48,6 +61,12 @@ class Item(db.Model):
             'date_created': self.date_created.strftime('%Y-%m-%d %H:%M:%S'),
             'is_resolved': self.is_resolved
         }
+
+# --- Create database tables ---
+# This ensures that the tables are created when the app starts.
+with app.app_context():
+    db.create_all()
+
 
 # --- Login Required Decorator ---
 def login_required(f):
@@ -84,8 +103,7 @@ def logout():
 def auth_status():
     return jsonify({'logged_in': 'logged_in' in session})
 
-# --- API Routes ---
-# This route is public
+# --- Public API Routes ---
 @app.route('/api/items', methods=['GET'])
 def get_items():
     status_filter = request.args.get('status', 'all')
@@ -108,7 +126,7 @@ def get_items():
     items = query.order_by(Item.date_created.desc()).all()
     return jsonify([item.to_dict() for item in items])
 
-# This route is public
+
 @app.route('/api/items', methods=['POST'])
 def create_item():
     try:
@@ -131,7 +149,23 @@ def create_item():
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 400
 
-# --- PROTECTED ADMIN ROUTES ---
+
+@app.route('/api/stats')
+def get_stats():
+    total_items = Item.query.count()
+    lost_items = Item.query.filter(Item.status == 'lost', Item.is_resolved == False).count()
+    found_items = Item.query.filter(Item.status == 'found', Item.is_resolved == False).count()
+    resolved_items = Item.query.filter(Item.is_resolved == True).count()
+    
+    return jsonify({
+        'total_items': total_items,
+        'lost_items': lost_items,
+        'found_items': found_items,
+        'resolved_items': resolved_items
+    })
+
+
+# --- Protected Admin API Routes ---
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
 @login_required
 def update_item(item_id):
@@ -178,24 +212,6 @@ def delete_item(item_id):
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
 
-# This route is public
-@app.route('/api/stats')
-def get_stats():
-    total_items = Item.query.count()
-    lost_items = Item.query.filter(Item.status == 'lost', Item.is_resolved == False).count()
-    found_items = Item.query.filter(Item.status == 'found', Item.is_resolved == False).count()
-    resolved_items = Item.query.filter(Item.is_resolved == True).count()
-    
-    return jsonify({
-        'total_items': total_items,
-        'lost_items': lost_items,
-        'found_items': found_items,
-        'resolved_items': resolved_items
-    })
-
-# Create tables if they don't exist
-with app.app_context():
-    db.create_all()
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
